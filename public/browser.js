@@ -41,7 +41,7 @@
       }
     }
   
-    // Update Feature
+    // Update Feat
     if (e.target.classList.contains("edit-me")) {
       let userInput = prompt("Enter your desired new text", e.target.parentElement.parentElement.querySelector(".item-text").innerHTML)
       if (userInput) {
