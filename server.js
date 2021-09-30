@@ -9,7 +9,7 @@ if (port == null || port == ""){
   port = 3000
 }
 
-app.use(express.static(__dirname + '/public'))
+app.use(express.static(__dirname + '/public')) 
 
 let connectionString = 'mongodb+srv://todoAppUser:cherish12@cluster0.kzgsk.mongodb.net/todoApp?retryWrites=true&w=majority'
 MongoClient.connect(connectionString, {useNewUrlParser: true, useUnifiedTopology: true} , function(err, client) {
@@ -20,20 +20,22 @@ MongoClient.connect(connectionString, {useNewUrlParser: true, useUnifiedTopology
 app.use(express.json())
 app.use(express.urlencoded({extended: false}))
 
-//function passwordProtected(req, res, next) {
-//    res.set('WWW-Authenticate', 'Basic realm="Simple Todo App"')
-//   console.log(req.headers.authorization)
-//    if (req.headers.authorization == "Placeholder") {
-//        next()
-//    }else {
-//        res.status(401).send('Authentication required')
-//    }
-// }
 
-app.get('/', function(req, res) {
+app.get('/', (req, res) => {
+  function guid() {
+    function s4() {
+      return Math.floor((1 + Math.random()) * 0x10000)
+        .toString(16)
+        .substring(1);
+    }
+    return s4() + s4() + '-' + s4() + '-' + s4() + '-' +
+      s4() + '-' + s4() + s4() + s4();
+  }
+
   function getCookie(name) {
     var nameEQ = name + "=";
-    var ca = req.headers.cookie.split(';');
+    var cookies = req.headers.cookie || '';
+    var ca = cookies.split(';');
     for(var i=0;i < ca.length;i++) {
         var c = ca[i];
         while (c.charAt(0)==' ') c = c.substring(1,c.length);
@@ -41,8 +43,8 @@ app.get('/', function(req, res) {
     }
     return null;
 }
-  let deviceId = browserID()  
-  db.collection('items').find({ deviceId: getCookie("token") }).toArray(function(err, items) {
+let token = guid()
+  db.collection('items').find({ deviceId: getCookie('token') }).toArray((err, items) =>{
     res.send(`<!DOCTYPE html>
   <html>
   <head>
@@ -60,6 +62,7 @@ app.get('/', function(req, res) {
   <form id="create-form" action="/create-item" method="POST">
   <div class="d-flex align-items-center">
   <input id="create-field" name="item" autofocus autocomplete="off" class="form-control mr-3" type="text" style="flex: 1;">
+  <input id="token" name="token" value=${token} autofocus autocomplete="off" class="form-control mr-3" style="flex: 1; display:none;" type="text">
   <button class="btn btn-primary">Add New Item</button>
   </div>
   </form>
@@ -73,22 +76,27 @@ app.get('/', function(req, res) {
   <script>
   let items = ${JSON.stringify(items)}
   </script>
-  
+  <script src="./device-uuid.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
   <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
-  <script src="/browser.js"></script>
+  <script src="./browser.js"></script>
+  <script>
+  document.cookie= "token=${token}";
+  </script>
   </body>
   </html>`)
   })
 })
 
-app.post('/create-item', function(req, res) {
-  db.collection('items').insertOne({text: req.body.text}, function(err, info) {
+app.post('/create-item', (req, res) => {
+  db.collection('items').insertOne({text: req.body.text, deviceId: req.body.token}, (err, info) => {
     if(err) {
         console.log('Error occured while inserting')
     }else {
         let data = {
             "_id": info.insertedId,
-            "text": req.body.text
+            "text": req.body.text,
+            deviceId: req.body.token,
         }
     res.json(data)
     }
