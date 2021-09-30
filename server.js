@@ -62,7 +62,7 @@ let token = guid()
   <form id="create-form" action="/create-item" method="POST">
   <div class="d-flex align-items-center">
   <input id="create-field" name="item" autofocus autocomplete="off" class="form-control mr-3" type="text" style="flex: 1;">
-  <input id="token" name="token" value=${token} autofocus autocomplete="off" class="form-control mr-3" style="flex: 1; display:none;" type="text">
+  <input id="token" name="token" value="ok" autofocus autocomplete="off" class="form-control mr-3" style="flex: 1; display:none;" type="text">
   <button class="btn btn-primary">Add New Item</button>
   </div>
   </form>
@@ -81,7 +81,24 @@ let token = guid()
   <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
   <script src="./browser.js"></script>
   <script>
+  
+  function getCookie(name) {
+    var nameEQ = name + "=";
+    var cookies = document.cookie || '';
+    var ca = cookies.split(';');
+    for(var i=0;i < ca.length;i++) {
+        var c = ca[i];
+        while (c.charAt(0)==' ') c = c.substring(1,c.length);
+        if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length,c.length);
+    }
+    return null;
+}
+
+if(getCookie("token") == null){
   document.cookie= "token=${token}";
+}
+document.getElementById("token").setAttribute('value',getCookie("token"));
+
   </script>
   </body>
   </html>`)
@@ -109,7 +126,6 @@ app.post('/update-item', function(req, res) {
   })
 })
 
-//delete
 app.post('/delete-item', function(req, res) {
     db.collection('items').deleteOne({_id: new mongodb.ObjectId(req.body.id)}, function() {
         res.send("Success")
