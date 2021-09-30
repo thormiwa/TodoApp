@@ -109,6 +109,7 @@ app.post('/update-item', function(req, res) {
   })
 })
 
+//delete
 app.post('/delete-item', function(req, res) {
     db.collection('items').deleteOne({_id: new mongodb.ObjectId(req.body.id)}, function() {
         res.send("Success")
