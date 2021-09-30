@@ -1,6 +1,7 @@
 let express = require('express')
 let { MongoClient } = require("mongodb")
 let mongodb = require('mongodb')
+let deviceId = require("browser-id")
 let app = express()
 let db
 
@@ -31,7 +32,8 @@ app.use(express.urlencoded({extended: false}))
 // }
 
 app.get('/', function(req, res) {
-  db.collection('items').find().toArray(function(err, items) {
+  let deviceId = browserID()  
+  db.collection('items').find({ deviceId: deviceId }).toArray(function(err, items) {
     res.send(`<!DOCTYPE html>
   <html>
   <head>

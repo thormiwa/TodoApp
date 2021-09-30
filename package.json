@@ -12,6 +12,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "browser-id": "^1.2.3",
     "express": "^4.17.1",
     "mongodb": "^4.1.2",
     "nodemon": "^2.0.13"
