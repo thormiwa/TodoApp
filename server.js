@@ -1,7 +1,6 @@
 let express = require('express')
 let { MongoClient } = require("mongodb")
 let mongodb = require('mongodb')
-let deviceId = require("browser-id")
 let app = express()
 let db
 
@@ -32,8 +31,18 @@ app.use(express.urlencoded({extended: false}))
 // }
 
 app.get('/', function(req, res) {
+  function getCookie(name) {
+    var nameEQ = name + "=";
+    var ca = req.headers.cookie.split(';');
+    for(var i=0;i < ca.length;i++) {
+        var c = ca[i];
+        while (c.charAt(0)==' ') c = c.substring(1,c.length);
+        if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length,c.length);
+    }
+    return null;
+}
   let deviceId = browserID()  
-  db.collection('items').find({ deviceId: deviceId }).toArray(function(err, items) {
+  db.collection('items').find({ deviceId: getCookie("token") }).toArray(function(err, items) {
     res.send(`<!DOCTYPE html>
   <html>
   <head>
